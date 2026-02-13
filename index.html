@@ -4,28 +4,41 @@
     <meta charset="UTF-8" />
     <title>Teams Tab</title>
 
-    <!-- Load Microsoft Teams JS SDK v2 -->
     <script src="https://res.cdn.office.net/teams-js/2.19.0/js/MicrosoftTeams.min.js"></script>
   </head>
   <body>
     <h1>Hello world</h1>
-
     <pre id="output"></pre>
 
     <script>
       async function init() {
+        const out = (obj) => {
+          document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
+        };
+
         try {
           await microsoftTeams.app.initialize();
 
-          const context = await microsoftTeams.app.getContext();
+          // IMPORTANT: use pages.getContext() for /l/entity context + subEntityId
+          const ctx = await microsoftTeams.pages.getContext();
 
-          console.log("Teams context:", context);
+          console.log("Teams pages context:", ctx);
 
-          document.getElementById("output").textContent =
-            JSON.stringify(context, null, 2);
+          const token =
+            ctx?.subEntityId ||
+            ctx?.page?.subPageId ||
+            ctx?.entityId;
 
+          out({
+            token,
+            subEntityId: ctx?.subEntityId,
+            subPageId: ctx?.page?.subPageId,
+            entityId: ctx?.entityId,
+            fullContext: ctx,
+          });
         } catch (err) {
           console.error("Teams init error:", err);
+          out({ error: String(err), note: "This must run inside a Teams tab frame." });
         }
       }
 
