@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Teams Tab</title>
+
+    <!-- Load Microsoft Teams JS SDK v2 -->
+    <script src="https://res.cdn.office.net/teams-js/2.19.0/js/MicrosoftTeams.min.js"></script>
+  </head>
   <body>
-    Hello world
+    <h1>Hello world</h1>
+
+    <pre id="output"></pre>
+
+    <script>
+      async function init() {
+        try {
+          await microsoftTeams.app.initialize();
+
+          const context = await microsoftTeams.app.getContext();
+
+          console.log("Teams context:", context);
+
+          document.getElementById("output").textContent =
+            JSON.stringify(context, null, 2);
+
+        } catch (err) {
+          console.error("Teams init error:", err);
+        }
+      }
+
+      init();
+    </script>
   </body>
 </html>
