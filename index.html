@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Teams Tab</title>
 
+    <!-- Teams JS SDK -->
     <script src="https://res.cdn.office.net/teams-js/2.19.0/js/MicrosoftTeams.min.js"></script>
   </head>
   <body>
@@ -11,34 +12,41 @@
     <pre id="output"></pre>
 
     <script>
-      async function init() {
-        const out = (obj) => {
-          document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
-        };
+      function show(obj) {
+        document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
+      }
 
+      async function init() {
         try {
           await microsoftTeams.app.initialize();
 
-          // IMPORTANT: use pages.getContext() for /l/entity context + subEntityId
-          const ctx = await microsoftTeams.pages.getContext();
+          const ctx = await microsoftTeams.app.getContext();
+          console.log("Teams app context:", ctx);
 
-          console.log("Teams pages context:", ctx);
-
+          // Where the deep-link context commonly ends up:
+          // - ctx.subEntityId  (classic / common)
+          // - ctx.page.subPageId (newer hosts sometimes)
+          // - ctx.page.id / ctx.entityId (fallbacks)
           const token =
             ctx?.subEntityId ||
             ctx?.page?.subPageId ||
+            ctx?.page?.id ||
             ctx?.entityId;
 
-          out({
+          show({
             token,
             subEntityId: ctx?.subEntityId,
-            subPageId: ctx?.page?.subPageId,
+            page_subPageId: ctx?.page?.subPageId,
+            page_id: ctx?.page?.id,
             entityId: ctx?.entityId,
             fullContext: ctx,
           });
         } catch (err) {
           console.error("Teams init error:", err);
-          out({ error: String(err), note: "This must run inside a Teams tab frame." });
+          show({
+            error: String(err),
+            hint: "This page must be loaded inside a Teams tab (iframe). Opening in a normal browser won't provide Teams context.",
+          });
         }
       }
 
